@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="eCommerce Bookstore Liberty Server">
+
+    <!-- ================================================================
+         Features
+    ================================================================ -->
+    <featureManager>
+        <feature>servlet-6.0</feature>
+        <feature>jpa-3.1</feature>
+        <feature>jdbc-4.2</feature>
+        <feature>jndi-1.0</feature>
+        <feature>jsonp-2.1</feature>
+        <feature>cdi-4.0</feature>
+    </featureManager>
+
+    <!-- ================================================================
+         HTTP Endpoint
+    ================================================================ -->
+    <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
+                  httpPort="9080"
+                  httpsPort="9443"/>
+
+    <!-- ================================================================
+         MySQL JDBC Driver
+         The MySQL connector JAR is expected on the Liberty shared library
+         path, or bundled into the WAR's WEB-INF/lib.
+    ================================================================ -->
+    <library id="mysqlLib">
+        <fileset dir="${shared.resource.dir}/mysql" includes="*.jar"/>
+    </library>
+
+    <jdbcDriver id="mysqlDriver" libraryRef="mysqlLib"/>
+
+    <!-- ================================================================
+         DataSource — JNDI name used by Spring's datasource auto-config
+         when spring.datasource.jndi-name is set, or consumed directly
+         by any JNDI lookup in the application.
+    ================================================================ -->
+    <dataSource id="bookstoreDS"
+                jndiName="jdbc/bookstoreDB"
+                jdbcDriverRef="mysqlDriver">
+        <properties.mysql
+            serverName="localhost"
+            portNumber="3306"
+            databaseName="bookstore_db"
+            user="root"
+            password="root"
+            useSSL="false"
+            allowPublicKeyRetrieval="true"
+            serverTimezone="UTC"/>
+        <connectionManager
+            minPoolSize="2"
+            maxPoolSize="20"
+            agedTimeout="30m"
+            connectionTimeout="30s"/>
+    </dataSource>
+
+    <!-- ================================================================
+         Web Application
+    ================================================================ -->
+    <webApplication id="ecommerce-bookstore"
+                    location="ecommerce-bookstore.war"
+                    contextRoot="/"/>
+
+    <!-- ================================================================
+         Logging
+    ================================================================ -->
+    <logging consoleLogLevel="INFO"
+             traceSpecification="com.bookstore.*=fine"/>
+
+</server>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookStore</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 15px; line-height: 1.6; background: #f7f8fa; color: #1f2328; min-height: 100vh; }
+
+  /* NAV */
+  nav { background: #1f2328; color: #fff; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 54px; position: sticky; top: 0; z-index: 100; }
+  nav .brand { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: .5px; }
+  nav .nav-right { display: flex; align-items: center; gap: 16px; }
+  nav button { background: none; border: 1px solid #444; color: #fff; padding: 5px 14px; border-radius: 5px; cursor: pointer; font-size: 13px; }
+  nav button:hover { background: #333; }
+  nav .cart-btn { position: relative; }
+  nav .cart-count { position: absolute; top: -6px; right: -6px; background: #3b82d4; color: #fff; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+  nav .user-info { font-size: 13px; color: #aaa; }
+
+  /* LAYOUT */
+  .page { display: none; max-width: 960px; margin: 0 auto; padding: 28px 20px; }
+  .page.active { display: block; }
+
+  /* AUTH CARD */
+  .auth-card { max-width: 400px; margin: 60px auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 32px; }
+  .auth-card h2 { margin-bottom: 20px; font-size: 20px; }
+  .auth-toggle { margin-top: 16px; font-size: 13px; color: #57606a; text-align: center; }
+  .auth-toggle span { color: #3b82d4; cursor: pointer; }
+
+  /* FORM ELEMENTS */
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #57606a; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid #d0d7de; border-radius: 5px; font-size: 14px; font-family: inherit; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #3b82d4; }
+  .btn { display: inline-block; padding: 8px 18px; border-radius: 5px; border: none; cursor: pointer; font-size: 14px; font-family: inherit; font-weight: 600; }
+  .btn-primary { background: #3b82d4; color: #fff; }
+  .btn-primary:hover { background: #2d6dbf; }
+  .btn-danger { background: #ef4444; color: #fff; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-outline { background: #fff; border: 1px solid #d0d7de; color: #1f2328; }
+  .btn-outline:hover { background: #f7f8fa; }
+  .btn-full { width: 100%; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* ALERT */
+  .alert { padding: 10px 14px; border-radius: 5px; margin-bottom: 16px; font-size: 13px; }
+  .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+  .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+
+  /* SEARCH BAR */
+  .search-bar { display: flex; gap: 10px; margin-bottom: 24px; }
+  .search-bar input { flex: 1; padding: 9px 12px; border: 1px solid #d0d7de; border-radius: 5px; font-size: 14px; }
+  .search-bar input:focus { outline: none; border-color: #3b82d4; }
+
+  /* BOOK GRID */
+  .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+  .book-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+  .book-cover { width: 100%; height: 160px; background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #57606a; font-size: 13px; }
+  .book-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .book-info { padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .book-title { font-weight: 700; font-size: 14px; line-height: 1.3; }
+  .book-author { font-size: 12px; color: #57606a; }
+  .book-price { font-size: 15px; font-weight: 700; color: #3b82d4; margin-top: auto; padding-top: 8px; }
+  .book-stock { font-size: 11px; color: #57606a; }
+  .book-actions { padding: 0 12px 12px; }
+
+  /* CART */
+  .cart-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+  .cart-item-info { flex: 1; }
+  .cart-item-title { font-weight: 700; font-size: 14px; }
+  .cart-item-price { font-size: 13px; color: #57606a; }
+  .qty-controls { display: flex; align-items: center; gap: 8px; }
+  .qty-controls button { width: 28px; height: 28px; border: 1px solid #d0d7de; background: #fff; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .qty-controls button:hover { background: #f7f8fa; }
+  .qty-controls span { min-width: 24px; text-align: center; font-weight: 600; }
+  .cart-summary { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-top: 16px; }
+  .cart-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .empty-state { text-align: center; padding: 60px 20px; color: #57606a; }
+  .empty-state h3 { margin-bottom: 8px; font-size: 18px; }
+
+  /* ORDERS */
+  .order-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+  .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .order-id { font-weight: 700; font-size: 14px; }
+  .order-date { font-size: 12px; color: #57606a; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .badge-pending { background: #fef3c7; color: #92400e; }
+  .badge-confirmed { background: #dbeafe; color: #1e40af; }
+  .badge-shipped { background: #ede9fe; color: #5b21b6; }
+  .badge-delivered { background: #dcfce7; color: #166534; }
+  .badge-cancelled { background: #fee2e2; color: #991b1b; }
+  .order-items-list { font-size: 13px; color: #57606a; border-top: 1px solid #e5e7eb; padding-top: 10px; }
+  .order-item-row { display: flex; justify-content: space-between; padding: 4px 0; }
+  .order-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 10px; margin-top: 10px; }
+  .order-total { font-weight: 700; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 8px; padding: 28px; width: 100%; max-width: 440px; }
+  .modal h3 { margin-bottom: 18px; font-size: 17px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* SECTION TITLE */
+  .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+
+  /* LOADING */
+  .loading { text-align: center; padding: 40px; color: #57606a; }
+
+  /* FOOTER */
+  footer { text-align: center; padding: 20px; font-size: 12px; color: #57606a; border-top: 1px solid #e5e7eb; margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="brand">📚 BookStore</div>
+  <div class="nav-right">
+    <span class="user-info" id="navUser"></span>
+    <button class="cart-btn" id="navCartBtn" style="display:none">
+      🛒 Cart
+      <span class="cart-count" id="cartCount" style="display:none">0</span>
+    </button>
+    <button id="navOrdersBtn" style="display:none">My Orders</button>
+    <button id="navLogoutBtn" style="display:none">Logout</button>
+    <button id="navLoginBtn">Login / Register</button>
+  </div>
+</nav>
+
+<!-- AUTH PAGE -->
+<div class="page active" id="pageAuth">
+  <div class="auth-card">
+    <h2 id="authTitle">Login</h2>
+    <div id="authAlert"></div>
+    <div id="authForm">
+      <div class="form-group" id="nameGroup" style="display:none">
+        <label>Full Name</label>
+        <input type="text" id="authName" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="authEmail" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="authPassword" placeholder="Password">
+      </div>
+      <button class="btn btn-primary btn-full" id="authSubmitBtn">Login</button>
+    </div>
+    <div class="auth-toggle" id="authToggle">
+      Don't have an account? <span id="authSwitchLink">Register here</span>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKS PAGE -->
+<div class="page" id="pageBooks">
+  <div class="section-title">Browse Books</div>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search by title or author…">
+    <button class="btn btn-primary" id="searchBtn">Search</button>
+    <button class="btn btn-outline" id="clearSearchBtn">Clear</button>
+  </div>
+  <div id="booksContainer"><div class="loading">Loading books…</div></div>
+</div>
+
+<!-- CART PAGE -->
+<div class="page" id="pageCart">
+  <div class="section-title">Shopping Cart</div>
+  <div id="cartContainer"><div class="loading">Loading cart…</div></div>
+</div>
+
+<!-- ORDERS PAGE -->
+<div class="page" id="pageOrders">
+  <div class="section-title">My Orders</div>
+  <div id="ordersContainer"><div class="loading">Loading orders…</div></div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal">
+    <h3>Place Order</h3>
+    <div id="checkoutAlert"></div>
+    <div class="form-group">
+      <label>Shipping Address</label>
+      <textarea id="shippingAddress" rows="3" placeholder="Enter your full shipping address…" style="width:100%;padding:8px 10px;border:1px solid #d0d7de;border-radius:5px;font-family:inherit;font-size:14px;resize:vertical;"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="checkoutCancelBtn">Cancel</button>
+      <button class="btn btn-primary" id="checkoutConfirmBtn">Confirm Order</button>
+    </div>
+  </div>
+</div>
+
+<footer>Made with IBM Bob</footer>
+
+<script>
+  const API = 'http://localhost:9090/api';
+  let token = localStorage.getItem('bs_token') || null;
+  let username = localStorage.getItem('bs_user') || null;
+  let isRegisterMode = false;
+  let cartItems = [];
+
+  // ── UTILS ──────────────────────────────────────────────────────────────────
+  function apiFetch(path, opts = {}) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    return fetch(API + path, { ...opts, headers }).then(r => r.json());
+  }
+
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function showAlert(containerId, msg, type = 'error') {
+    document.getElementById(containerId).innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  }
+
+  function clearAlert(containerId) {
+    document.getElementById(containerId).innerHTML = '';
+  }
+
+  function badgeClass(status) {
+    const map = { PENDING: 'pending', CONFIRMED: 'confirmed', SHIPPED: 'shipped', DELIVERED: 'delivered', CANCELLED: 'cancelled' };
+    return 'badge badge-' + (map[status] || 'pending');
+  }
+
+  function formatDate(str) {
+    if (!str) return '';
+    return new Date(str).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // ── AUTH STATE ─────────────────────────────────────────────────────────────
+  function applyAuthState() {
+    const loggedIn = !!token;
+    document.getElementById('navLoginBtn').style.display = loggedIn ? 'none' : 'inline-block';
+    document.getElementById('navLogoutBtn').style.display = loggedIn ? 'inline-block' : 'none';
+    document.getElementById('navCartBtn').style.display = loggedIn ? 'inline-block' : 'none';
+    document.getElementById('navOrdersBtn').style.display = loggedIn ? 'inline-block' : 'none';
+    document.getElementById('navUser').textContent = loggedIn ? ('Hi, ' + username) : '';
+    if (loggedIn) { showPage('pageBooks'); loadBooks(); loadCartCount(); }
+    else showPage('pageAuth');
+  }
+
+  function logout() {
+    token = null; username = null;
+    localStorage.removeItem('bs_token');
+    localStorage.removeItem('bs_user');
+    cartItems = [];
+    updateCartBadge(0);
+    applyAuthState();
+  }
+
+  // ── AUTH ───────────────────────────────────────────────────────────────────
+  function setAuthMode(register) {
+    isRegisterMode = register;
+    document.getElementById('authTitle').textContent = register ? 'Create Account' : 'Login';
+    document.getElementById('nameGroup').style.display = register ? 'block' : 'none';
+    document.getElementById('authSubmitBtn').textContent = register ? 'Register' : 'Login';
+    document.getElementById('authToggle').innerHTML = register
+      ? 'Already have an account? <span id="authSwitchLink">Login here</span>'
+      : "Don't have an account? <span id=\"authSwitchLink\">Register here</span>";
+    document.getElementById('authSwitchLink').addEventListener('click', () => setAuthMode(!isRegisterMode));
+    clearAlert('authAlert');
+  }
+
+  document.getElementById('authSwitchLink').addEventListener('click', () => setAuthMode(!isRegisterMode));
+
+  document.getElementById('authSubmitBtn').addEventListener('click', async () => {
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value.trim();
+    const name = document.getElementById('authName').value.trim();
+    if (!email || !password) return showAlert('authAlert', 'Email and password are required.');
+    if (isRegisterMode) {
+      if (!name) return showAlert('authAlert', 'Name is required.');
+      const res = await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify({ username: name, email, password, role: 'USER' }) });
+      if (res.success) {
+        token = res.data.token; username = res.data.username;
+        localStorage.setItem('bs_token', token); localStorage.setItem('bs_user', username);
+        applyAuthState();
+      } else showAlert('authAlert', res.message || 'Registration failed.');
+    } else {
+      const res = await apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+      if (res.success) {
+        token = res.data.token; username = res.data.username;
+        localStorage.setItem('bs_token', token); localStorage.setItem('bs_user', username);
+        applyAuthState();
+      } else showAlert('authAlert', res.message || 'Login failed. Check your credentials.');
+    }
+  });
+
+  document.getElementById('navLoginBtn').addEventListener('click', () => showPage('pageAuth'));
+  document.getElementById('navLogoutBtn').addEventListener('click', logout);
+
+  // ── BOOKS ──────────────────────────────────────────────────────────────────
+  async function loadBooks(search = '') {
+    const container = document.getElementById('booksContainer');
+    container.innerHTML = '<div class="loading">Loading books…</div>';
+    const query = search ? `?search=${encodeURIComponent(search)}` : '';
+    const res = await apiFetch('/books' + query);
+    if (!res.success || !res.data || res.data.length === 0) {
+      container.innerHTML = '<div class="empty-state"><h3>No books found</h3><p>Try a different search term.</p></div>';
+      return;
+    }
+    container.innerHTML = '<div class="books-grid">' +
+      res.data.map(book => `
+        <div class="book-card">
+          <div class="book-cover">
+            ${book.imageUrl ? `<img src="${book.imageUrl}" alt="${book.title}" onerror="this.parentElement.textContent='No Image'">` : '📖 No Image'}
+          </div>
+          <div class="book-info">
+            <div class="book-title">${book.title}</div>
+            <div class="book-author">by ${book.author}</div>
+            <div class="book-price">₹${parseFloat(book.price).toFixed(2)}</div>
+            <div class="book-stock">${book.stockQuantity > 0 ? book.stockQuantity + ' in stock' : '<span style="color:#ef4444">Out of stock</span>'}</div>
+          </div>
+          <div class="book-actions">
+            <button class="btn btn-primary btn-full btn-sm add-to-cart-btn"
+              data-id="${book.id}" data-title="${book.title}"
+              ${book.stockQuantity <= 0 ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''}>
+              Add to Cart
+            </button>
+          </div>
+        </div>`).join('') + '</div>';
+
+    container.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+      btn.addEventListener('click', () => addToCart(btn.dataset.id, btn.dataset.title, btn));
+    });
+  }
+
+  document.getElementById('navCartBtn').addEventListener('click', () => { showPage('pageCart'); loadCart(); });
+  document.getElementById('navOrdersBtn').addEventListener('click', () => { showPage('pageOrders'); loadOrders(); });
+  document.getElementById('searchBtn').addEventListener('click', () => loadBooks(document.getElementById('searchInput').value));
+  document.getElementById('clearSearchBtn').addEventListener('click', () => { document.getElementById('searchInput').value = ''; loadBooks(); });
+  document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') loadBooks(e.target.value); });
+
+  // ── CART ───────────────────────────────────────────────────────────────────
+  async function addToCart(bookId, title, btn) {
+    btn.disabled = true; btn.textContent = 'Adding…';
+    const res = await apiFetch('/cart', { method: 'POST', body: JSON.stringify({ bookId: parseInt(bookId), quantity: 1 }) });
+    if (res.success) {
+      btn.textContent = '✓ Added';
+      loadCartCount();
+      setTimeout(() => { btn.textContent = 'Add to Cart'; btn.disabled = false; }, 1500);
+    } else {
+      btn.textContent = 'Add to Cart'; btn.disabled = false;
+      alert(res.message || 'Could not add to cart.');
+    }
+  }
+
+  async function loadCartCount() {
+    const res = await apiFetch('/cart');
+    if (res.success && res.data) {
+      cartItems = res.data;
+      updateCartBadge(res.data.reduce((s, i) => s + i.quantity, 0));
+    }
+  }
+
+  function updateCartBadge(count) {
+    const badge = document.getElementById('cartCount');
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }
+
+  async function loadCart() {
+    const container = document.getElementById('cartContainer');
+    container.innerHTML = '<div class="loading">Loading cart…</div>';
+    const res = await apiFetch('/cart');
+    if (!res.success) { container.innerHTML = '<div class="empty-state"><h3>Failed to load cart</h3></div>'; return; }
+    cartItems = res.data || [];
+    if (cartItems.length === 0) {
+      container.innerHTML = '<div class="empty-state"><h3>Your cart is empty</h3><p>Browse books and add some to your cart.</p></div>';
+      updateCartBadge(0); return;
+    }
+    const total = cartItems.reduce((s, i) => s + (i.quantity * parseFloat(i.book?.price || 0)), 0);
+    updateCartBadge(cartItems.reduce((s, i) => s + i.quantity, 0));
+    container.innerHTML =
+      cartItems.map(item => `
+        <div class="cart-item" id="cart-item-${item.id}">
+          <div class="cart-item-info">
+            <div class="cart-item-title">${item.book?.title || 'Book'}</div>
+            <div class="cart-item-price">₹${parseFloat(item.book?.price || 0).toFixed(2)} each</div>
+          </div>
+          <div class="qty-controls">
+            <button class="qty-dec" data-id="${item.id}" data-qty="${item.quantity}">−</button>
+            <span>${item.quantity}</span>
+            <button class="qty-inc" data-id="${item.id}" data-qty="${item.quantity}">+</button>
+          </div>
+          <div style="min-width:70px;text-align:right;font-weight:700">₹${(item.quantity * parseFloat(item.book?.price || 0)).toFixed(2)}</div>
+          <button class="btn btn-danger btn-sm remove-item-btn" data-id="${item.id}">Remove</button>
+        </div>`).join('') +
+      `<div class="cart-summary">
+        <div class="cart-total"><span>Total</span><span>₹${total.toFixed(2)}</span></div>
+        <button class="btn btn-primary btn-full" id="checkoutBtn">Proceed to Checkout</button>
+      </div>`;
+
+    container.querySelectorAll('.qty-dec').forEach(btn => {
+      btn.addEventListener('click', () => { const q = parseInt(btn.dataset.qty); if (q <= 1) removeCartItem(btn.dataset.id); else updateCartItem(btn.dataset.id, q - 1); });
+    });
+    container.querySelectorAll('.qty-inc').forEach(btn => {
+      btn.addEventListener('click', () => updateCartItem(btn.dataset.id, parseInt(btn.dataset.qty) + 1));
+    });
+    container.querySelectorAll('.remove-item-btn').forEach(btn => {
+      btn.addEventListener('click', () => removeCartItem(btn.dataset.id));
+    });
+    document.getElementById('checkoutBtn').addEventListener('click', openCheckout);
+  }
+
+  async function updateCartItem(id, qty) {
+    const res = await apiFetch('/cart/' + id, { method: 'PUT', body: JSON.stringify({ quantity: qty }) });
+    if (res.success) loadCart();
+  }
+
+  async function removeCartItem(id) {
+    const res = await apiFetch('/cart/' + id, { method: 'DELETE' });
+    if (res.success) loadCart();
+  }
+
+  // ── CHECKOUT ───────────────────────────────────────────────────────────────
+  function openCheckout() {
+    document.getElementById('shippingAddress').value = '';
+    clearAlert('checkoutAlert');
+    document.getElementById('checkoutModal').classList.add('open');
+  }
+
+  document.getElementById('checkoutCancelBtn').addEventListener('click', () => {
+    document.getElementById('checkoutModal').classList.remove('open');
+  });
+
+  document.getElementById('checkoutConfirmBtn').addEventListener('click', async () => {
+    const address = document.getElementById('shippingAddress').value.trim();
+    if (!address) return showAlert('checkoutAlert', 'Please enter a shipping address.');
+    const btn = document.getElementById('checkoutConfirmBtn');
+    btn.disabled = true; btn.textContent = 'Placing order…';
+    const res = await apiFetch('/orders', { method: 'POST', body: JSON.stringify({ shippingAddress: address }) });
+    btn.disabled = false; btn.textContent = 'Confirm Order';
+    if (res.success) {
+      document.getElementById('checkoutModal').classList.remove('open');
+      showPage('pageOrders');
+      loadOrders();
+      loadCartCount();
+    } else showAlert('checkoutAlert', res.message || 'Failed to place order.');
+  });
+
+  // ── ORDERS ─────────────────────────────────────────────────────────────────
+  async function loadOrders() {
+    const container = document.getElementById('ordersContainer');
+    container.innerHTML = '<div class="loading">Loading orders…</div>';
+    const res = await apiFetch('/orders');
+    if (!res.success) { container.innerHTML = '<div class="empty-state"><h3>Failed to load orders</h3></div>'; return; }
+    const orders = res.data || [];
+    if (orders.length === 0) {
+      container.innerHTML = '<div class="empty-state"><h3>No orders yet</h3><p>Place your first order from the cart.</p></div>';
+      return;
+    }
+    container.innerHTML = orders.map(order => `
+      <div class="order-card">
+        <div class="order-header">
+          <div>
+            <div class="order-id">Order #${order.id}</div>
+            <div class="order-date">${formatDate(order.createdAt)}</div>
+          </div>
+          <span class="${badgeClass(order.status)}">${order.status}</span>
+        </div>
+        <div class="order-items-list">
+          ${(order.orderItems || []).map(i => `
+            <div class="order-item-row">
+              <span>${i.book?.title || 'Book'} × ${i.quantity}</span>
+              <span>₹${(i.quantity * parseFloat(i.unitPrice || 0)).toFixed(2)}</span>
+            </div>`).join('')}
+        </div>
+        <div class="order-footer">
+          <span style="font-size:13px;color:#57606a">${order.shippingAddress || ''}</span>
+          <span class="order-total">Total: ₹${parseFloat(order.totalAmount || 0).toFixed(2)}</span>
+        </div>
+        ${order.status === 'PENDING' ? `<div style="margin-top:12px"><button class="btn btn-danger btn-sm cancel-order-btn" data-id="${order.id}">Cancel Order</button></div>` : ''}
+      </div>`).join('');
+
+    container.querySelectorAll('.cancel-order-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Cancel this order?')) return;
+        const res = await apiFetch('/orders/' + btn.dataset.id, { method: 'DELETE' });
+        if (res.success) loadOrders();
+        else alert(res.message || 'Could not cancel order.');
+      });
+    });
+  }
+
+  // ── INIT ───────────────────────────────────────────────────────────────────
+  applyAuthState();
+</script>
+</body>
+</html>

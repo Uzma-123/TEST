@@ -135,9 +135,13 @@
     <h2 id="authTitle">Login</h2>
     <div id="authAlert"></div>
     <div id="authForm">
-      <div class="form-group" id="nameGroup" style="display:none">
-        <label>Full Name</label>
-        <input type="text" id="authName" placeholder="Your name">
+      <div class="form-group" id="firstNameGroup" style="display:none">
+        <label>First Name</label>
+        <input type="text" id="authFirstName" placeholder="First name">
+      </div>
+      <div class="form-group" id="lastNameGroup" style="display:none">
+        <label>Last Name</label>
+        <input type="text" id="authLastName" placeholder="Last name">
       </div>
       <div class="form-group">
         <label>Email</label>
@@ -258,7 +262,8 @@
   function setAuthMode(register) {
     isRegisterMode = register;
     document.getElementById('authTitle').textContent = register ? 'Create Account' : 'Login';
-    document.getElementById('nameGroup').style.display = register ? 'block' : 'none';
+    document.getElementById('firstNameGroup').style.display = register ? 'block' : 'none';
+    document.getElementById('lastNameGroup').style.display = register ? 'block' : 'none';
     document.getElementById('authSubmitBtn').textContent = register ? 'Register' : 'Login';
     document.getElementById('authToggle').innerHTML = register
       ? 'Already have an account? <span id="authSwitchLink">Login here</span>'
@@ -272,11 +277,12 @@
   document.getElementById('authSubmitBtn').addEventListener('click', async () => {
     const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value.trim();
-    const name = document.getElementById('authName').value.trim();
+    const firstName = document.getElementById('authFirstName').value.trim();
+    const lastName = document.getElementById('authLastName').value.trim();
     if (!email || !password) return showAlert('authAlert', 'Email and password are required.');
     if (isRegisterMode) {
-      if (!name) return showAlert('authAlert', 'Name is required.');
-      const res = await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify({ username: name, email, password, role: 'USER' }) });
+      if (!firstName || !lastName) return showAlert('authAlert', 'First and last name are required.');
+      const res = await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify({ firstName, lastName, email, password }) });
       if (res.success) {
         token = res.data.token; username = res.data.username;
         localStorage.setItem('bs_token', token); localStorage.setItem('bs_user', username);

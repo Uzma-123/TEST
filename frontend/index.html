@@ -119,6 +119,7 @@
   <div class="brand">📚 BookStore</div>
   <div class="nav-right">
     <span class="user-info" id="navUser"></span>
+    <button id="navHomeBtn" style="display:none">Home</button>
     <button class="cart-btn" id="navCartBtn" style="display:none">
       🛒 Cart
       <span class="cart-count" id="cartCount" style="display:none">0</span>
@@ -242,6 +243,7 @@
     const loggedIn = !!token;
     document.getElementById('navLoginBtn').style.display = loggedIn ? 'none' : 'inline-block';
     document.getElementById('navLogoutBtn').style.display = loggedIn ? 'inline-block' : 'none';
+    document.getElementById('navHomeBtn').style.display = loggedIn ? 'inline-block' : 'none';
     document.getElementById('navCartBtn').style.display = loggedIn ? 'inline-block' : 'none';
     document.getElementById('navOrdersBtn').style.display = loggedIn ? 'inline-block' : 'none';
     document.getElementById('navUser').textContent = loggedIn ? ('Hi, ' + username) : '';
@@ -284,14 +286,14 @@
       if (!firstName || !lastName) return showAlert('authAlert', 'First and last name are required.');
       const res = await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify({ firstName, lastName, email, password }) });
       if (res.success) {
-        token = res.data.token; username = res.data.username;
+        token = res.data.token; username = res.data.firstName + ' ' + res.data.lastName;
         localStorage.setItem('bs_token', token); localStorage.setItem('bs_user', username);
         applyAuthState();
       } else showAlert('authAlert', res.message || 'Registration failed.');
     } else {
       const res = await apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
       if (res.success) {
-        token = res.data.token; username = res.data.username;
+        token = res.data.token; username = res.data.firstName + ' ' + res.data.lastName;
         localStorage.setItem('bs_token', token); localStorage.setItem('bs_user', username);
         applyAuthState();
       } else showAlert('authAlert', res.message || 'Login failed. Check your credentials.');
@@ -300,6 +302,7 @@
 
   document.getElementById('navLoginBtn').addEventListener('click', () => showPage('pageAuth'));
   document.getElementById('navLogoutBtn').addEventListener('click', logout);
+  document.getElementById('navHomeBtn').addEventListener('click', () => { showPage('pageBooks'); loadBooks(); });
 
   // ── BOOKS ──────────────────────────────────────────────────────────────────
   async function loadBooks(search = '') {
@@ -381,21 +384,21 @@
       container.innerHTML = '<div class="empty-state"><h3>Your cart is empty</h3><p>Browse books and add some to your cart.</p></div>';
       updateCartBadge(0); return;
     }
-    const total = cartItems.reduce((s, i) => s + (i.quantity * parseFloat(i.book?.price || 0)), 0);
+    const total = cartItems.reduce((s, i) => s + parseFloat(i.subtotal || 0), 0);
     updateCartBadge(cartItems.reduce((s, i) => s + i.quantity, 0));
     container.innerHTML =
       cartItems.map(item => `
         <div class="cart-item" id="cart-item-${item.id}">
           <div class="cart-item-info">
-            <div class="cart-item-title">${item.book?.title || 'Book'}</div>
-            <div class="cart-item-price">₹${parseFloat(item.book?.price || 0).toFixed(2)} each</div>
+            <div class="cart-item-title">${item.bookTitle || 'Book'}</div>
+            <div class="cart-item-price">₹${parseFloat(item.unitPrice || 0).toFixed(2)} each</div>
           </div>
           <div class="qty-controls">
             <button class="qty-dec" data-id="${item.id}" data-qty="${item.quantity}">−</button>
             <span>${item.quantity}</span>
             <button class="qty-inc" data-id="${item.id}" data-qty="${item.quantity}">+</button>
           </div>
-          <div style="min-width:70px;text-align:right;font-weight:700">₹${(item.quantity * parseFloat(item.book?.price || 0)).toFixed(2)}</div>
+          <div style="min-width:70px;text-align:right;font-weight:700">₹${parseFloat(item.subtotal || 0).toFixed(2)}</div>
           <button class="btn btn-danger btn-sm remove-item-btn" data-id="${item.id}">Remove</button>
         </div>`).join('') +
       `<div class="cart-summary">
@@ -467,15 +470,15 @@
         <div class="order-header">
           <div>
             <div class="order-id">Order #${order.id}</div>
-            <div class="order-date">${formatDate(order.createdAt)}</div>
+            <div class="order-date">${formatDate(order.orderDate)}</div>
           </div>
           <span class="${badgeClass(order.status)}">${order.status}</span>
         </div>
         <div class="order-items-list">
-          ${(order.orderItems || []).map(i => `
+          ${(order.items || []).map(i => `
             <div class="order-item-row">
-              <span>${i.book?.title || 'Book'} × ${i.quantity}</span>
-              <span>₹${(i.quantity * parseFloat(i.unitPrice || 0)).toFixed(2)}</span>
+              <span>${i.bookTitle || 'Book'} × ${i.quantity}</span>
+              <span>₹${parseFloat(i.subtotal || 0).toFixed(2)}</span>
             </div>`).join('')}
         </div>
         <div class="order-footer">

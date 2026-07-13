@@ -163,6 +163,28 @@
     border-radius: 3px;
   }
 
+  /* ── CATEGORY TABS ── */
+  .cat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .cat-tab {
+    padding: 7px 18px; border-radius: 20px; border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--muted); font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all .2s; font-family: inherit;
+  }
+  .cat-tab:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+  .cat-tab.active { background: linear-gradient(135deg, var(--brand), #9333ea); color: #fff; border-color: transparent; box-shadow: 0 2px 10px rgba(108,59,234,.3); }
+
+  /* ── CATEGORY SECTION ── */
+  .cat-section { margin-bottom: 36px; }
+  .cat-section-title {
+    font-size: 17px; font-weight: 800; color: var(--text);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .cat-section-title .cat-pill {
+    background: var(--brand-light); color: var(--brand);
+    font-size: 11px; font-weight: 700; padding: 2px 10px;
+    border-radius: 10px; border: 1px solid #c4b5fd;
+  }
+
   /* ── BOOK GRID ── */
   .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px; }
   .book-card {
@@ -377,7 +399,7 @@
       <button class="btn btn-ghost btn-sm" id="clearSearchBtn" style="color:#fff;background:rgba(255,255,255,.2)">Clear</button>
     </div>
   </div>
-  <div class="section-title">All Books</div>
+  <div class="cat-tabs" id="catTabs"></div>
   <div id="booksContainer"><div class="loading">Loading books</div></div>
 </div>
 
@@ -520,44 +542,114 @@
   document.getElementById('navHomeBtn').addEventListener('click',   () => { showPage('pageBooks'); loadBooks(); });
 
   // ── BOOKS ──────────────────────────────────────────────────────────────────
-  async function loadBooks(search = '') {
+  let allCategories = [];
+  let activeCatId = 'all';
+
+  function bookCardHTML(book) {
+    return `
+      <div class="book-card">
+        <div class="book-cover">
+          ${book.imageUrl
+            ? `<img src="${book.imageUrl}" alt="${book.title}" onerror="this.parentElement.innerHTML='📖'">`
+            : '📖'}
+        </div>
+        <div class="book-badge">${book.category ? book.category.name : 'Book'}</div>
+        <div class="book-info">
+          <div class="book-title">${book.title}</div>
+          <div class="book-author">by ${book.author}</div>
+          <div class="book-price">$${parseFloat(book.price).toFixed(2)}</div>
+          <div class="book-stock">${book.stockQuantity > 0
+            ? '<span style="color:#10b981;font-weight:700">✔ In stock</span> · ' + book.stockQuantity + ' left'
+            : '<span style="color:#ef4444;font-weight:700">✘ Out of stock</span>'}</div>
+        </div>
+        <div class="book-actions">
+          <button class="btn btn-primary btn-full btn-sm add-to-cart-btn"
+            data-id="${book.id}" data-title="${book.title}"
+            ${book.stockQuantity <= 0 ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''}>
+            🛒 Add to Cart
+          </button>
+        </div>
+      </div>`;
+  }
+
+  function renderCatTabs(books) {
+    const tabsEl = document.getElementById('catTabs');
+    // derive category counts from current book list
+    const countMap = {};
+    books.forEach(b => {
+      const cid = b.category ? b.category.id : 0;
+      const cname = b.category ? b.category.name : 'Uncategorised';
+      countMap[cid] = { name: cname, count: (countMap[cid] ? countMap[cid].count : 0) + 1 };
+    });
+    const tabs = [{ id: 'all', name: 'All Books', count: books.length }]
+      .concat(Object.entries(countMap).map(([id, v]) => ({ id, name: v.name, count: v.count })));
+
+    tabsEl.innerHTML = tabs.map(t => `
+      <button class="cat-tab${t.id == activeCatId ? ' active' : ''}" data-cat="${t.id}">
+        ${t.name} <span style="opacity:.7;font-weight:600">(${t.count})</span>
+      </button>`).join('');
+
+    tabsEl.querySelectorAll('.cat-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeCatId = btn.dataset.cat;
+        renderBooks(books);
+        tabsEl.querySelectorAll('.cat-tab').forEach(b => b.classList.toggle('active', b.dataset.cat == activeCatId));
+      });
+    });
+  }
+
+  function renderBooks(books) {
     const container = document.getElementById('booksContainer');
-    container.innerHTML = '<div class="loading">Loading books</div>';
-    const query = search ? `?search=${encodeURIComponent(search)}` : '';
-    const res = await apiFetch('/books' + query);
-    if (!res.success || !res.data || res.data.length === 0) {
+    const filtered = activeCatId === 'all'
+      ? books
+      : books.filter(b => b.category && String(b.category.id) === String(activeCatId));
+
+    if (filtered.length === 0) {
       container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3>No books found</h3><p>Try a different search term.</p></div>';
       return;
     }
-    container.innerHTML = '<div class="books-grid">' +
-      res.data.map(book => `
-        <div class="book-card">
-          <div class="book-cover">
-            ${book.imageUrl
-              ? `<img src="${book.imageUrl}" alt="${book.title}" onerror="this.parentElement.innerHTML='📖'">`
-              : '📖'}
+
+    if (activeCatId === 'all') {
+      // group by category
+      const groups = {};
+      const order = [];
+      filtered.forEach(b => {
+        const key = b.category ? b.category.id : 0;
+        const name = b.category ? b.category.name : 'Uncategorised';
+        if (!groups[key]) { groups[key] = { name, books: [] }; order.push(key); }
+        groups[key].books.push(b);
+      });
+      container.innerHTML = order.map(key => `
+        <div class="cat-section">
+          <div class="cat-section-title">
+            ${groups[key].name}
+            <span class="cat-pill">${groups[key].books.length} book${groups[key].books.length > 1 ? 's' : ''}</span>
           </div>
-          <div class="book-badge">${book.category ? book.category.name : 'Book'}</div>
-          <div class="book-info">
-            <div class="book-title">${book.title}</div>
-            <div class="book-author">by ${book.author}</div>
-            <div class="book-price">$${parseFloat(book.price).toFixed(2)}</div>
-            <div class="book-stock">${book.stockQuantity > 0
-              ? '<span style="color:#10b981;font-weight:700">✔ In stock</span> · ' + book.stockQuantity + ' left'
-              : '<span style="color:#ef4444;font-weight:700">✘ Out of stock</span>'}</div>
-          </div>
-          <div class="book-actions">
-            <button class="btn btn-primary btn-full btn-sm add-to-cart-btn"
-              data-id="${book.id}" data-title="${book.title}"
-              ${book.stockQuantity <= 0 ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''}>
-              🛒 Add to Cart
-            </button>
-          </div>
-        </div>`).join('') + '</div>';
+          <div class="books-grid">${groups[key].books.map(bookCardHTML).join('')}</div>
+        </div>`).join('');
+    } else {
+      container.innerHTML = `<div class="books-grid">${filtered.map(bookCardHTML).join('')}</div>`;
+    }
 
     container.querySelectorAll('.add-to-cart-btn').forEach(btn => {
       btn.addEventListener('click', () => addToCart(btn.dataset.id, btn.dataset.title, btn));
     });
+  }
+
+  async function loadBooks(search = '') {
+    const container = document.getElementById('booksContainer');
+    container.innerHTML = '<div class="loading">Loading books</div>';
+    if (search) activeCatId = 'all';
+    const query = search ? `?search=${encodeURIComponent(search)}` : '';
+    const res = await apiFetch('/books' + query);
+    if (!res.success || !res.data || res.data.length === 0) {
+      document.getElementById('catTabs').innerHTML = '';
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3>No books found</h3><p>Try a different search term.</p></div>';
+      return;
+    }
+    if (!search) renderCatTabs(res.data);
+    else document.getElementById('catTabs').innerHTML = '';
+    renderBooks(res.data);
   }
 
   document.getElementById('navCartBtn').addEventListener('click',   () => { showPage('pageCart');   loadCart(); });

@@ -6,195 +6,407 @@
 <title>BookStore</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 15px; line-height: 1.6; background: #f7f8fa; color: #1f2328; min-height: 100vh; }
 
-  /* NAV */
-  nav { background: #1f2328; color: #fff; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 54px; position: sticky; top: 0; z-index: 100; }
-  nav .brand { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: .5px; }
-  nav .nav-right { display: flex; align-items: center; gap: 16px; }
-  nav button { background: none; border: 1px solid #444; color: #fff; padding: 5px 14px; border-radius: 5px; cursor: pointer; font-size: 13px; }
-  nav button:hover { background: #333; }
+  :root {
+    --brand:      #6c3bea;
+    --brand-dark: #4f28c0;
+    --brand-light:#ede9fe;
+    --accent:     #f59e0b;
+    --accent-dark:#d97706;
+    --danger:     #ef4444;
+    --danger-dark:#dc2626;
+    --success:    #10b981;
+    --bg:         #f5f3ff;
+    --surface:    #ffffff;
+    --border:     #e5e7eb;
+    --text:       #1e1b4b;
+    --muted:      #6b7280;
+    --nav-h:      60px;
+  }
+
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 15px; line-height: 1.6;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  nav {
+    background: linear-gradient(135deg, #4f28c0 0%, #6c3bea 60%, #9333ea 100%);
+    color: #fff; padding: 0 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: var(--nav-h); position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 16px rgba(108,59,234,.35);
+  }
+  nav .brand { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: .5px; }
+  nav .brand span { color: var(--accent); }
+  nav .nav-right { display: flex; align-items: center; gap: 12px; }
+  nav .nav-btn {
+    background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+    color: #fff; padding: 6px 16px; border-radius: 20px; cursor: pointer;
+    font-size: 13px; font-weight: 600; font-family: inherit; transition: background .2s;
+  }
+  nav .nav-btn:hover { background: rgba(255,255,255,.28); }
+  nav .nav-btn-accent {
+    background: var(--accent); border-color: var(--accent); color: #1e1b4b;
+  }
+  nav .nav-btn-accent:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
   nav .cart-btn { position: relative; }
-  nav .cart-count { position: absolute; top: -6px; right: -6px; background: #3b82d4; color: #fff; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; }
-  nav .user-info { font-size: 13px; color: #aaa; }
+  nav .cart-count {
+    position: absolute; top: -7px; right: -7px;
+    background: var(--danger); color: #fff; border-radius: 50%;
+    width: 19px; height: 19px; font-size: 10px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #fff;
+  }
+  nav .user-info {
+    font-size: 13px; color: rgba(255,255,255,.8);
+    background: rgba(255,255,255,.1); padding: 4px 12px;
+    border-radius: 16px; font-weight: 600;
+  }
 
-  /* LAYOUT */
-  .page { display: none; max-width: 960px; margin: 0 auto; padding: 28px 20px; }
+  /* ── LAYOUT ── */
+  .page { display: none; max-width: 1000px; margin: 0 auto; padding: 32px 20px; }
   .page.active { display: block; }
 
-  /* AUTH CARD */
-  .auth-card { max-width: 400px; margin: 60px auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 32px; }
-  .auth-card h2 { margin-bottom: 20px; font-size: 20px; }
-  .auth-toggle { margin-top: 16px; font-size: 13px; color: #57606a; text-align: center; }
-  .auth-toggle span { color: #3b82d4; cursor: pointer; }
+  /* ── HERO (Books page top) ── */
+  .hero {
+    background: linear-gradient(135deg, #6c3bea, #9333ea);
+    border-radius: 16px; padding: 36px 32px; margin-bottom: 28px; color: #fff;
+    box-shadow: 0 4px 24px rgba(108,59,234,.3);
+  }
+  .hero h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+  .hero p  { font-size: 14px; color: rgba(255,255,255,.8); margin-bottom: 20px; }
+  .hero .search-bar {
+    display: flex; gap: 8px;
+    background: rgba(255,255,255,.15); border-radius: 10px; padding: 6px 6px 6px 14px;
+    backdrop-filter: blur(4px);
+  }
+  .hero .search-bar input {
+    flex: 1; background: transparent; border: none; color: #fff;
+    font-size: 14px; font-family: inherit; outline: none;
+  }
+  .hero .search-bar input::placeholder { color: rgba(255,255,255,.6); }
+  .hero .search-bar .btn { border-radius: 7px; }
 
-  /* FORM ELEMENTS */
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #57606a; }
-  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid #d0d7de; border-radius: 5px; font-size: 14px; font-family: inherit; }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #3b82d4; }
-  .btn { display: inline-block; padding: 8px 18px; border-radius: 5px; border: none; cursor: pointer; font-size: 14px; font-family: inherit; font-weight: 600; }
-  .btn-primary { background: #3b82d4; color: #fff; }
-  .btn-primary:hover { background: #2d6dbf; }
-  .btn-danger { background: #ef4444; color: #fff; }
-  .btn-danger:hover { background: #dc2626; }
-  .btn-outline { background: #fff; border: 1px solid #d0d7de; color: #1f2328; }
-  .btn-outline:hover { background: #f7f8fa; }
+  /* ── AUTH CARD ── */
+  .auth-wrap {
+    min-height: calc(100vh - var(--nav-h));
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(160deg, #f5f3ff 0%, #ede9fe 100%);
+  }
+  .auth-card {
+    max-width: 420px; width: 100%;
+    background: var(--surface); border-radius: 16px; padding: 36px;
+    box-shadow: 0 8px 40px rgba(108,59,234,.12); border: 1px solid #ddd6fe;
+  }
+  .auth-card .auth-icon { font-size: 40px; margin-bottom: 12px; }
+  .auth-card h2 { font-size: 22px; font-weight: 800; color: var(--brand); margin-bottom: 6px; }
+  .auth-card .auth-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .auth-toggle { margin-top: 18px; font-size: 13px; color: var(--muted); text-align: center; }
+  .auth-toggle span { color: var(--brand); cursor: pointer; font-weight: 700; }
+
+  /* ── FORM ELEMENTS ── */
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 5px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%; padding: 10px 12px; border: 1.5px solid var(--border);
+    border-radius: 8px; font-size: 14px; font-family: inherit;
+    background: #fafafa; transition: border-color .2s, box-shadow .2s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none; border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(108,59,234,.12);
+    background: #fff;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 9px 20px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 14px; font-family: inherit; font-weight: 700; transition: all .2s;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--brand), #9333ea);
+    color: #fff; box-shadow: 0 2px 10px rgba(108,59,234,.3);
+  }
+  .btn-primary:hover { filter: brightness(1.08); box-shadow: 0 4px 16px rgba(108,59,234,.4); transform: translateY(-1px); }
+  .btn-accent  { background: var(--accent); color: #1e1b4b; }
+  .btn-accent:hover  { background: var(--accent-dark); transform: translateY(-1px); }
+  .btn-danger  { background: var(--danger); color: #fff; }
+  .btn-danger:hover  { background: var(--danger-dark); transform: translateY(-1px); }
+  .btn-outline { background: #fff; border: 1.5px solid var(--border); color: var(--text); }
+  .btn-outline:hover { background: var(--brand-light); border-color: var(--brand); color: var(--brand); }
+  .btn-ghost { background: rgba(108,59,234,.08); color: var(--brand); border: none; }
+  .btn-ghost:hover { background: rgba(108,59,234,.16); }
   .btn-full { width: 100%; }
-  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
 
-  /* ALERT */
-  .alert { padding: 10px 14px; border-radius: 5px; margin-bottom: 16px; font-size: 13px; }
-  .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
-  .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+  /* ── ALERTS ── */
+  .alert { padding: 11px 15px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; font-weight: 600; }
+  .alert-error   { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+  .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
 
-  /* SEARCH BAR */
-  .search-bar { display: flex; gap: 10px; margin-bottom: 24px; }
-  .search-bar input { flex: 1; padding: 9px 12px; border: 1px solid #d0d7de; border-radius: 5px; font-size: 14px; }
-  .search-bar input:focus { outline: none; border-color: #3b82d4; }
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-size: 20px; font-weight: 800; margin-bottom: 20px; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before {
+    content: ''; display: inline-block;
+    width: 4px; height: 22px; background: linear-gradient(to bottom, var(--brand), #9333ea);
+    border-radius: 3px;
+  }
 
-  /* BOOK GRID */
-  .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-  .book-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-  .book-cover { width: 100%; height: 160px; background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #57606a; font-size: 13px; }
+  /* ── BOOK GRID ── */
+  .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px; }
+  .book-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .book-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(108,59,234,.15); }
+  .book-cover {
+    width: 100%; height: 170px;
+    background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; color: var(--brand);
+  }
   .book-cover img { width: 100%; height: 100%; object-fit: cover; }
-  .book-info { padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .book-title { font-weight: 700; font-size: 14px; line-height: 1.3; }
-  .book-author { font-size: 12px; color: #57606a; }
-  .book-price { font-size: 15px; font-weight: 700; color: #3b82d4; margin-top: auto; padding-top: 8px; }
-  .book-stock { font-size: 11px; color: #57606a; }
-  .book-actions { padding: 0 12px 12px; }
+  .book-badge {
+    position: relative; margin-top: -10px; margin-left: 12px;
+    display: inline-block; background: var(--brand-light);
+    color: var(--brand); font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: .4px;
+    border: 1px solid #c4b5fd;
+  }
+  .book-info { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .book-title { font-weight: 800; font-size: 14px; line-height: 1.3; color: var(--text); }
+  .book-author { font-size: 12px; color: var(--muted); }
+  .book-price {
+    font-size: 18px; font-weight: 800; margin-top: auto; padding-top: 10px;
+    color: var(--brand);
+  }
+  .book-stock { font-size: 11px; color: var(--muted); }
+  .book-actions { padding: 0 14px 14px; }
 
-  /* CART */
-  .cart-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+  /* ── CART ── */
+  .cart-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px;
+    display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
+    transition: box-shadow .2s;
+  }
+  .cart-item:hover { box-shadow: 0 4px 16px rgba(108,59,234,.08); }
+  .cart-item-icon {
+    width: 48px; height: 60px;
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
   .cart-item-info { flex: 1; }
-  .cart-item-title { font-weight: 700; font-size: 14px; }
-  .cart-item-price { font-size: 13px; color: #57606a; }
-  .qty-controls { display: flex; align-items: center; gap: 8px; }
-  .qty-controls button { width: 28px; height: 28px; border: 1px solid #d0d7de; background: #fff; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-  .qty-controls button:hover { background: #f7f8fa; }
-  .qty-controls span { min-width: 24px; text-align: center; font-weight: 600; }
-  .cart-summary { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-top: 16px; }
-  .cart-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
-  .empty-state { text-align: center; padding: 60px 20px; color: #57606a; }
-  .empty-state h3 { margin-bottom: 8px; font-size: 18px; }
+  .cart-item-title { font-weight: 700; font-size: 14px; color: var(--text); }
+  .cart-item-price { font-size: 13px; color: var(--muted); }
+  .qty-controls { display: flex; align-items: center; gap: 10px; }
+  .qty-controls button {
+    width: 30px; height: 30px;
+    background: var(--brand-light); border: 1.5px solid #c4b5fd; color: var(--brand);
+    border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; transition: all .15s;
+    font-family: inherit;
+  }
+  .qty-controls button:hover { background: var(--brand); color: #fff; }
+  .qty-controls span { min-width: 24px; text-align: center; font-weight: 800; font-size: 15px; }
 
-  /* ORDERS */
-  .order-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 14px; }
-  .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .order-id { font-weight: 700; font-size: 14px; }
-  .order-date { font-size: 12px; color: #57606a; }
-  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-  .badge-pending { background: #fef3c7; color: #92400e; }
-  .badge-confirmed { background: #dbeafe; color: #1e40af; }
-  .badge-shipped { background: #ede9fe; color: #5b21b6; }
-  .badge-delivered { background: #dcfce7; color: #166534; }
-  .badge-cancelled { background: #fee2e2; color: #991b1b; }
-  .order-items-list { font-size: 13px; color: #57606a; border-top: 1px solid #e5e7eb; padding-top: 10px; }
-  .order-item-row { display: flex; justify-content: space-between; padding: 4px 0; }
-  .order-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 10px; margin-top: 10px; }
-  .order-total { font-weight: 700; }
+  .cart-summary {
+    background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+    border: 1.5px solid #c4b5fd; border-radius: 14px;
+    padding: 22px; margin-top: 16px;
+  }
+  .cart-total {
+    display: flex; justify-content: space-between;
+    font-size: 18px; font-weight: 800; margin-bottom: 16px; color: var(--text);
+  }
+  .cart-total .amount { color: var(--brand); font-size: 22px; }
 
-  /* MODAL */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: center; justify-content: center; }
+  /* ── ORDERS ── */
+  .order-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px; margin-bottom: 16px;
+    transition: box-shadow .2s;
+  }
+  .order-card:hover { box-shadow: 0 4px 20px rgba(108,59,234,.1); }
+  .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .order-id { font-weight: 800; font-size: 15px; color: var(--brand); }
+  .order-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .badge {
+    display: inline-flex; align-items: center; padding: 4px 12px;
+    border-radius: 20px; font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .badge-pending   { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .badge-confirmed { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+  .badge-shipped   { background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+  .badge-delivered { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .badge-cancelled { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .order-items-list {
+    font-size: 13px; color: var(--muted);
+    border-top: 1px solid var(--border); padding-top: 12px;
+  }
+  .order-item-row {
+    display: flex; justify-content: space-between;
+    padding: 4px 0; font-size: 13px;
+  }
+  .order-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px;
+  }
+  .order-total { font-weight: 800; color: var(--brand); font-size: 15px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(30,27,75,.5);
+    backdrop-filter: blur(3px);
+    z-index: 200; align-items: center; justify-content: center;
+  }
   .modal-overlay.open { display: flex; }
-  .modal { background: #fff; border-radius: 8px; padding: 28px; width: 100%; max-width: 440px; }
-  .modal h3 { margin-bottom: 18px; font-size: 17px; }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .modal {
+    background: var(--surface); border-radius: 16px; padding: 32px;
+    width: 100%; max-width: 460px;
+    box-shadow: 0 20px 60px rgba(108,59,234,.25);
+    border: 1px solid #ddd6fe;
+  }
+  .modal h3 { font-size: 19px; font-weight: 800; margin-bottom: 20px; color: var(--brand); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
 
-  /* SECTION TITLE */
-  .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+  /* ── EMPTY / LOADING ── */
+  .empty-state { text-align: center; padding: 64px 20px; color: var(--muted); }
+  .empty-state .empty-icon { font-size: 52px; margin-bottom: 12px; }
+  .empty-state h3 { margin-bottom: 6px; font-size: 18px; font-weight: 800; color: var(--text); }
+  .loading {
+    text-align: center; padding: 48px; color: var(--brand);
+    font-weight: 700; font-size: 15px;
+  }
+  .loading::after {
+    content: ''; display: block; margin: 16px auto 0;
+    width: 36px; height: 36px;
+    border: 3px solid var(--brand-light);
+    border-top-color: var(--brand);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* LOADING */
-  .loading { text-align: center; padding: 40px; color: #57606a; }
+  /* ── DIVIDER ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 
-  /* FOOTER */
-  footer { text-align: center; padding: 20px; font-size: 12px; color: #57606a; border-top: 1px solid #e5e7eb; margin-top: 40px; }
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 22px; font-size: 12px; color: var(--muted);
+    border-top: 1px solid var(--border); margin-top: 48px;
+  }
 </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-  <div class="brand">📚 BookStore</div>
+  <div class="brand">📚 Book<span>Store</span></div>
   <div class="nav-right">
-    <span class="user-info" id="navUser"></span>
-    <button id="navHomeBtn" style="display:none">Home</button>
-    <button class="cart-btn" id="navCartBtn" style="display:none">
+    <span class="user-info" id="navUser" style="display:none"></span>
+    <button class="nav-btn" id="navHomeBtn" style="display:none">🏠 Home</button>
+    <button class="nav-btn cart-btn" id="navCartBtn" style="display:none">
       🛒 Cart
       <span class="cart-count" id="cartCount" style="display:none">0</span>
     </button>
-    <button id="navOrdersBtn" style="display:none">My Orders</button>
-    <button id="navLogoutBtn" style="display:none">Logout</button>
-    <button id="navLoginBtn">Login / Register</button>
+    <button class="nav-btn" id="navOrdersBtn" style="display:none">📦 My Orders</button>
+    <button class="nav-btn" id="navLogoutBtn" style="display:none">Logout</button>
+    <button class="nav-btn nav-btn-accent" id="navLoginBtn">Login / Register</button>
   </div>
 </nav>
 
 <!-- AUTH PAGE -->
 <div class="page active" id="pageAuth">
-  <div class="auth-card">
-    <h2 id="authTitle">Login</h2>
-    <div id="authAlert"></div>
-    <div id="authForm">
-      <div class="form-group" id="firstNameGroup" style="display:none">
-        <label>First Name</label>
-        <input type="text" id="authFirstName" placeholder="First name">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-icon">📚</div>
+      <h2 id="authTitle">Welcome back</h2>
+      <p class="auth-sub" id="authSub">Sign in to continue to BookStore</p>
+      <div id="authAlert"></div>
+      <div id="authForm">
+        <div class="form-group" id="firstNameGroup" style="display:none">
+          <label>First Name</label>
+          <input type="text" id="authFirstName" placeholder="First name">
+        </div>
+        <div class="form-group" id="lastNameGroup" style="display:none">
+          <label>Last Name</label>
+          <input type="text" id="authLastName" placeholder="Last name">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="authEmail" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="authPassword" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary btn-full" id="authSubmitBtn">Login</button>
       </div>
-      <div class="form-group" id="lastNameGroup" style="display:none">
-        <label>Last Name</label>
-        <input type="text" id="authLastName" placeholder="Last name">
+      <div class="auth-toggle" id="authToggle">
+        Don't have an account? <span id="authSwitchLink">Register here</span>
       </div>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="authEmail" placeholder="you@example.com">
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="authPassword" placeholder="Password">
-      </div>
-      <button class="btn btn-primary btn-full" id="authSubmitBtn">Login</button>
-    </div>
-    <div class="auth-toggle" id="authToggle">
-      Don't have an account? <span id="authSwitchLink">Register here</span>
     </div>
   </div>
 </div>
 
 <!-- BOOKS PAGE -->
 <div class="page" id="pageBooks">
-  <div class="section-title">Browse Books</div>
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search by title or author…">
-    <button class="btn btn-primary" id="searchBtn">Search</button>
-    <button class="btn btn-outline" id="clearSearchBtn">Clear</button>
+  <div class="hero">
+    <h1>Discover Your Next Book</h1>
+    <p>Browse our curated collection of titles from the world's greatest authors.</p>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search by title or author…">
+      <button class="btn btn-accent btn-sm" id="searchBtn">Search</button>
+      <button class="btn btn-ghost btn-sm" id="clearSearchBtn" style="color:#fff;background:rgba(255,255,255,.2)">Clear</button>
+    </div>
   </div>
-  <div id="booksContainer"><div class="loading">Loading books…</div></div>
+  <div class="section-title">All Books</div>
+  <div id="booksContainer"><div class="loading">Loading books</div></div>
 </div>
 
 <!-- CART PAGE -->
 <div class="page" id="pageCart">
   <div class="section-title">Shopping Cart</div>
-  <div id="cartContainer"><div class="loading">Loading cart…</div></div>
+  <div id="cartContainer"><div class="loading">Loading cart</div></div>
 </div>
 
 <!-- ORDERS PAGE -->
 <div class="page" id="pageOrders">
   <div class="section-title">My Orders</div>
-  <div id="ordersContainer"><div class="loading">Loading orders…</div></div>
+  <div id="ordersContainer"><div class="loading">Loading orders</div></div>
 </div>
 
 <!-- CHECKOUT MODAL -->
 <div class="modal-overlay" id="checkoutModal">
   <div class="modal">
-    <h3>Place Order</h3>
+    <h3>🚚 Place Your Order</h3>
     <div id="checkoutAlert"></div>
     <div class="form-group">
       <label>Shipping Address</label>
-      <textarea id="shippingAddress" rows="3" placeholder="Enter your full shipping address…" style="width:100%;padding:8px 10px;border:1px solid #d0d7de;border-radius:5px;font-family:inherit;font-size:14px;resize:vertical;"></textarea>
+      <textarea id="shippingAddress" rows="3" placeholder="Enter your full shipping address…"
+        style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;transition:border-color .2s;"
+        onfocus="this.style.borderColor='#6c3bea'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" id="checkoutCancelBtn">Cancel</button>
-      <button class="btn btn-primary" id="checkoutConfirmBtn">Confirm Order</button>
+      <button class="btn btn-primary" id="checkoutConfirmBtn">✅ Confirm Order</button>
     </div>
   </div>
 </div>
@@ -241,12 +453,14 @@
   // ── AUTH STATE ─────────────────────────────────────────────────────────────
   function applyAuthState() {
     const loggedIn = !!token;
-    document.getElementById('navLoginBtn').style.display = loggedIn ? 'none' : 'inline-block';
-    document.getElementById('navLogoutBtn').style.display = loggedIn ? 'inline-block' : 'none';
-    document.getElementById('navHomeBtn').style.display = loggedIn ? 'inline-block' : 'none';
-    document.getElementById('navCartBtn').style.display = loggedIn ? 'inline-block' : 'none';
-    document.getElementById('navOrdersBtn').style.display = loggedIn ? 'inline-block' : 'none';
-    document.getElementById('navUser').textContent = loggedIn ? ('Hi, ' + username) : '';
+    document.getElementById('navLoginBtn').style.display  = loggedIn ? 'none' : 'inline-flex';
+    document.getElementById('navLogoutBtn').style.display = loggedIn ? 'inline-flex' : 'none';
+    document.getElementById('navHomeBtn').style.display   = loggedIn ? 'inline-flex' : 'none';
+    document.getElementById('navCartBtn').style.display   = loggedIn ? 'inline-flex' : 'none';
+    document.getElementById('navOrdersBtn').style.display = loggedIn ? 'inline-flex' : 'none';
+    const navUser = document.getElementById('navUser');
+    navUser.style.display = loggedIn ? 'inline-block' : 'none';
+    navUser.textContent   = loggedIn ? ('Hi, ' + username) : '';
     if (loggedIn) { showPage('pageBooks'); loadBooks(); loadCartCount(); }
     else showPage('pageAuth');
   }
@@ -263,10 +477,11 @@
   // ── AUTH ───────────────────────────────────────────────────────────────────
   function setAuthMode(register) {
     isRegisterMode = register;
-    document.getElementById('authTitle').textContent = register ? 'Create Account' : 'Login';
+    document.getElementById('authTitle').textContent = register ? 'Create Account' : 'Welcome back';
+    document.getElementById('authSub').textContent   = register ? 'Join BookStore today' : 'Sign in to continue to BookStore';
     document.getElementById('firstNameGroup').style.display = register ? 'block' : 'none';
-    document.getElementById('lastNameGroup').style.display = register ? 'block' : 'none';
-    document.getElementById('authSubmitBtn').textContent = register ? 'Register' : 'Login';
+    document.getElementById('lastNameGroup').style.display  = register ? 'block' : 'none';
+    document.getElementById('authSubmitBtn').textContent = register ? 'Create Account' : 'Login';
     document.getElementById('authToggle').innerHTML = register
       ? 'Already have an account? <span id="authSwitchLink">Login here</span>'
       : "Don't have an account? <span id=\"authSwitchLink\">Register here</span>";
@@ -277,10 +492,10 @@
   document.getElementById('authSwitchLink').addEventListener('click', () => setAuthMode(!isRegisterMode));
 
   document.getElementById('authSubmitBtn').addEventListener('click', async () => {
-    const email = document.getElementById('authEmail').value.trim();
+    const email    = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value.trim();
     const firstName = document.getElementById('authFirstName').value.trim();
-    const lastName = document.getElementById('authLastName').value.trim();
+    const lastName  = document.getElementById('authLastName').value.trim();
     if (!email || !password) return showAlert('authAlert', 'Email and password are required.');
     if (isRegisterMode) {
       if (!firstName || !lastName) return showAlert('authAlert', 'First and last name are required.');
@@ -300,37 +515,42 @@
     }
   });
 
-  document.getElementById('navLoginBtn').addEventListener('click', () => showPage('pageAuth'));
+  document.getElementById('navLoginBtn').addEventListener('click',  () => showPage('pageAuth'));
   document.getElementById('navLogoutBtn').addEventListener('click', logout);
-  document.getElementById('navHomeBtn').addEventListener('click', () => { showPage('pageBooks'); loadBooks(); });
+  document.getElementById('navHomeBtn').addEventListener('click',   () => { showPage('pageBooks'); loadBooks(); });
 
   // ── BOOKS ──────────────────────────────────────────────────────────────────
   async function loadBooks(search = '') {
     const container = document.getElementById('booksContainer');
-    container.innerHTML = '<div class="loading">Loading books…</div>';
+    container.innerHTML = '<div class="loading">Loading books</div>';
     const query = search ? `?search=${encodeURIComponent(search)}` : '';
     const res = await apiFetch('/books' + query);
     if (!res.success || !res.data || res.data.length === 0) {
-      container.innerHTML = '<div class="empty-state"><h3>No books found</h3><p>Try a different search term.</p></div>';
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3>No books found</h3><p>Try a different search term.</p></div>';
       return;
     }
     container.innerHTML = '<div class="books-grid">' +
       res.data.map(book => `
         <div class="book-card">
           <div class="book-cover">
-            ${book.imageUrl ? `<img src="${book.imageUrl}" alt="${book.title}" onerror="this.parentElement.textContent='No Image'">` : '📖 No Image'}
+            ${book.imageUrl
+              ? `<img src="${book.imageUrl}" alt="${book.title}" onerror="this.parentElement.innerHTML='📖'">`
+              : '📖'}
           </div>
+          <div class="book-badge">${book.category ? book.category.name : 'Book'}</div>
           <div class="book-info">
             <div class="book-title">${book.title}</div>
             <div class="book-author">by ${book.author}</div>
-            <div class="book-price">₹${parseFloat(book.price).toFixed(2)}</div>
-            <div class="book-stock">${book.stockQuantity > 0 ? book.stockQuantity + ' in stock' : '<span style="color:#ef4444">Out of stock</span>'}</div>
+            <div class="book-price">$${parseFloat(book.price).toFixed(2)}</div>
+            <div class="book-stock">${book.stockQuantity > 0
+              ? '<span style="color:#10b981;font-weight:700">✔ In stock</span> · ' + book.stockQuantity + ' left'
+              : '<span style="color:#ef4444;font-weight:700">✘ Out of stock</span>'}</div>
           </div>
           <div class="book-actions">
             <button class="btn btn-primary btn-full btn-sm add-to-cart-btn"
               data-id="${book.id}" data-title="${book.title}"
               ${book.stockQuantity <= 0 ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''}>
-              Add to Cart
+              🛒 Add to Cart
             </button>
           </div>
         </div>`).join('') + '</div>';
@@ -340,7 +560,7 @@
     });
   }
 
-  document.getElementById('navCartBtn').addEventListener('click', () => { showPage('pageCart'); loadCart(); });
+  document.getElementById('navCartBtn').addEventListener('click',   () => { showPage('pageCart');   loadCart(); });
   document.getElementById('navOrdersBtn').addEventListener('click', () => { showPage('pageOrders'); loadOrders(); });
   document.getElementById('searchBtn').addEventListener('click', () => loadBooks(document.getElementById('searchInput').value));
   document.getElementById('clearSearchBtn').addEventListener('click', () => { document.getElementById('searchInput').value = ''; loadBooks(); });
@@ -351,11 +571,12 @@
     btn.disabled = true; btn.textContent = 'Adding…';
     const res = await apiFetch('/cart', { method: 'POST', body: JSON.stringify({ bookId: parseInt(bookId), quantity: 1 }) });
     if (res.success) {
-      btn.textContent = '✓ Added';
+      btn.textContent = '✓ Added!';
+      btn.style.background = '#10b981';
       loadCartCount();
-      setTimeout(() => { btn.textContent = 'Add to Cart'; btn.disabled = false; }, 1500);
+      setTimeout(() => { btn.textContent = '🛒 Add to Cart'; btn.style.background = ''; btn.disabled = false; }, 1600);
     } else {
-      btn.textContent = 'Add to Cart'; btn.disabled = false;
+      btn.textContent = '🛒 Add to Cart'; btn.disabled = false;
       alert(res.message || 'Could not add to cart.');
     }
   }
@@ -376,12 +597,12 @@
 
   async function loadCart() {
     const container = document.getElementById('cartContainer');
-    container.innerHTML = '<div class="loading">Loading cart…</div>';
+    container.innerHTML = '<div class="loading">Loading cart</div>';
     const res = await apiFetch('/cart');
-    if (!res.success) { container.innerHTML = '<div class="empty-state"><h3>Failed to load cart</h3></div>'; return; }
+    if (!res.success) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Failed to load cart</h3></div>'; return; }
     cartItems = res.data || [];
     if (cartItems.length === 0) {
-      container.innerHTML = '<div class="empty-state"><h3>Your cart is empty</h3><p>Browse books and add some to your cart.</p></div>';
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">🛒</div><h3>Your cart is empty</h3><p>Browse books and add some to your cart.</p></div>';
       updateCartBadge(0); return;
     }
     const total = cartItems.reduce((s, i) => s + parseFloat(i.subtotal || 0), 0);
@@ -389,21 +610,25 @@
     container.innerHTML =
       cartItems.map(item => `
         <div class="cart-item" id="cart-item-${item.id}">
+          <div class="cart-item-icon">📖</div>
           <div class="cart-item-info">
             <div class="cart-item-title">${item.bookTitle || 'Book'}</div>
-            <div class="cart-item-price">₹${parseFloat(item.unitPrice || 0).toFixed(2)} each</div>
+            <div class="cart-item-price">$${parseFloat(item.unitPrice || 0).toFixed(2)} each</div>
           </div>
           <div class="qty-controls">
             <button class="qty-dec" data-id="${item.id}" data-qty="${item.quantity}">−</button>
             <span>${item.quantity}</span>
             <button class="qty-inc" data-id="${item.id}" data-qty="${item.quantity}">+</button>
           </div>
-          <div style="min-width:70px;text-align:right;font-weight:700">₹${parseFloat(item.subtotal || 0).toFixed(2)}</div>
+          <div style="min-width:80px;text-align:right;font-weight:800;font-size:15px;color:#6c3bea">$${parseFloat(item.subtotal || 0).toFixed(2)}</div>
           <button class="btn btn-danger btn-sm remove-item-btn" data-id="${item.id}">Remove</button>
         </div>`).join('') +
       `<div class="cart-summary">
-        <div class="cart-total"><span>Total</span><span>₹${total.toFixed(2)}</span></div>
-        <button class="btn btn-primary btn-full" id="checkoutBtn">Proceed to Checkout</button>
+        <div class="cart-total">
+          <span>Order Total</span>
+          <span class="amount">$${total.toFixed(2)}</span>
+        </div>
+        <button class="btn btn-primary btn-full" id="checkoutBtn">🚚 Proceed to Checkout</button>
       </div>`;
 
     container.querySelectorAll('.qty-dec').forEach(btn => {
@@ -445,7 +670,7 @@
     const btn = document.getElementById('checkoutConfirmBtn');
     btn.disabled = true; btn.textContent = 'Placing order…';
     const res = await apiFetch('/orders', { method: 'POST', body: JSON.stringify({ shippingAddress: address }) });
-    btn.disabled = false; btn.textContent = 'Confirm Order';
+    btn.disabled = false; btn.textContent = '✅ Confirm Order';
     if (res.success) {
       document.getElementById('checkoutModal').classList.remove('open');
       showPage('pageOrders');
@@ -457,12 +682,12 @@
   // ── ORDERS ─────────────────────────────────────────────────────────────────
   async function loadOrders() {
     const container = document.getElementById('ordersContainer');
-    container.innerHTML = '<div class="loading">Loading orders…</div>';
+    container.innerHTML = '<div class="loading">Loading orders</div>';
     const res = await apiFetch('/orders');
-    if (!res.success) { container.innerHTML = '<div class="empty-state"><h3>Failed to load orders</h3></div>'; return; }
+    if (!res.success) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Failed to load orders</h3></div>'; return; }
     const orders = res.data || [];
     if (orders.length === 0) {
-      container.innerHTML = '<div class="empty-state"><h3>No orders yet</h3><p>Place your first order from the cart.</p></div>';
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><h3>No orders yet</h3><p>Place your first order from the cart.</p></div>';
       return;
     }
     container.innerHTML = orders.map(order => `
@@ -477,15 +702,17 @@
         <div class="order-items-list">
           ${(order.items || []).map(i => `
             <div class="order-item-row">
-              <span>${i.bookTitle || 'Book'} × ${i.quantity}</span>
-              <span>₹${parseFloat(i.subtotal || 0).toFixed(2)}</span>
+              <span>📖 ${i.bookTitle || 'Book'} × ${i.quantity}</span>
+              <span style="font-weight:700">$${parseFloat(i.subtotal || 0).toFixed(2)}</span>
             </div>`).join('')}
         </div>
         <div class="order-footer">
-          <span style="font-size:13px;color:#57606a">${order.shippingAddress || ''}</span>
-          <span class="order-total">Total: ₹${parseFloat(order.totalAmount || 0).toFixed(2)}</span>
+          <span style="font-size:12px;color:#6b7280">📍 ${order.shippingAddress || ''}</span>
+          <span class="order-total">Total: $${parseFloat(order.totalAmount || 0).toFixed(2)}</span>
         </div>
-        ${order.status === 'PENDING' ? `<div style="margin-top:12px"><button class="btn btn-danger btn-sm cancel-order-btn" data-id="${order.id}">Cancel Order</button></div>` : ''}
+        ${order.status === 'PENDING'
+          ? `<div style="margin-top:14px"><button class="btn btn-danger btn-sm cancel-order-btn" data-id="${order.id}">Cancel Order</button></div>`
+          : ''}
       </div>`).join('');
 
     container.querySelectorAll('.cancel-order-btn').forEach(btn => {

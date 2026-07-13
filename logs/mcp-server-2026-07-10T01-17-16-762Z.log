@@ -1,0 +1,32 @@
+[2026-07-10T01:17:20.457Z] [WARN] Could not read package.json from project root: Error: ENOENT: no such file or directory, open 'C:\Users\Uzma\OneDrive - IBM\Desktop\Bob\E-commerce_Book\package.json'
+[2026-07-10T01:17:20.458Z] [ERROR] Couldn't find project name in package json
+[2026-07-10T01:17:20.458Z] [WARN] Could not read package.json from project root: Error: ENOENT: no such file or directory, open 'C:\Users\Uzma\OneDrive - IBM\Desktop\Bob\E-commerce_Book\package.json'
+[2026-07-10T01:17:20.459Z] [INFO] Initializing MCP Server: unnamed-mcp-server@0.0.0
+[2026-07-10T01:17:20.459Z] [DEBUG] Initialized ToolLoader with directory: C:\Users\Uzma\AppData\Local\npm-cache\_npx\d14dbf7ba352e13b\node_modules\jira-mcp-server\dist\tools
+[2026-07-10T01:17:20.459Z] [DEBUG] Initialized PromptLoader with directory: C:\Users\Uzma\AppData\Local\npm-cache\_npx\d14dbf7ba352e13b\node_modules\jira-mcp-server\dist\prompts
+[2026-07-10T01:17:20.459Z] [DEBUG] Initialized ResourceLoader with directory: C:\Users\Uzma\AppData\Local\npm-cache\_npx\d14dbf7ba352e13b\node_modules\jira-mcp-server\dist\resources
+[2026-07-10T01:17:20.460Z] [DEBUG] Looking for tools in: C:\Users\Uzma\AppData\Local\npm-cache\_npx\d14dbf7ba352e13b\node_modules\jira-mcp-server\dist\tools
+[2026-07-10T01:17:20.460Z] [DEBUG] Looking for prompts in: C:\Users\Uzma\AppData\Local\npm-cache\_npx\d14dbf7ba352e13b\node_modules\jira-mcp-server\dist\prompts
+[2026-07-10T01:17:20.460Z] [DEBUG] Looking for resources in: C:\Users\Uzma\AppData\Local\npm-cache\_npx\d14dbf7ba352e13b\node_modules\jira-mcp-server\dist\resources
+[2026-07-10T01:17:20.460Z] [DEBUG] Attempting to load tools from: C:\Users\Uzma\AppData\Local\npm-cache\_npx\d14dbf7ba352e13b\node_modules\jira-mcp-server\dist\tools
+[2026-07-10T01:17:20.468Z] [DEBUG] Found files in directory: ExampleTool.js
+[2026-07-10T01:17:20.468Z] [DEBUG] Checking file ExampleTool.js: included
+[2026-07-10T01:17:20.468Z] [DEBUG] Attempting to load tool from: C:\Users\Uzma\AppData\Local\npm-cache\_npx\d14dbf7ba352e13b\node_modules\jira-mcp-server\dist\tools\ExampleTool.js
+[2026-07-10T01:17:20.502Z] [DEBUG] Validated tool: example_tool
+[2026-07-10T01:17:20.502Z] [DEBUG] Successfully loaded 1 tools: example_tool
+[2026-07-10T01:17:20.503Z] [DEBUG] Attempting to load prompts from: C:\Users\Uzma\AppData\Local\npm-cache\_npx\d14dbf7ba352e13b\node_modules\jira-mcp-server\dist\prompts
+[2026-07-10T01:17:20.503Z] [DEBUG] No prompts directory found
+[2026-07-10T01:17:20.504Z] [DEBUG] Attempting to load resources from: C:\Users\Uzma\AppData\Local\npm-cache\_npx\d14dbf7ba352e13b\node_modules\jira-mcp-server\dist\resources
+[2026-07-10T01:17:20.504Z] [DEBUG] No resources directory found
+[2026-07-10T01:17:20.504Z] [DEBUG] No prompts directory found
+[2026-07-10T01:17:20.505Z] [DEBUG] No resources directory found
+[2026-07-10T01:17:20.505Z] [DEBUG] Creating MCP Server instance
+[2026-07-10T01:17:20.506Z] [DEBUG] Server created with capabilities: {"tools":{"enabled":true}}
+[2026-07-10T01:17:20.506Z] [INFO] Starting transport...
+[2026-07-10T01:17:20.506Z] [DEBUG] Creating transport: stdio
+[2026-07-10T01:17:20.506Z] [INFO] Starting stdio transport
+[2026-07-10T01:17:20.507Z] [INFO] Transport connected successfully
+[2026-07-10T01:17:20.507Z] [INFO] Started unnamed-mcp-server@0.0.0
+[2026-07-10T01:17:20.507Z] [INFO] Transport: stdio
+[2026-07-10T01:17:20.507Z] [INFO] Tools (1): example_tool
+[2026-07-10T01:17:20.507Z] [INFO] Server running and ready for connections

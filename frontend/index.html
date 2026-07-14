@@ -523,9 +523,10 @@
       if (!firstName || !lastName) return showAlert('authAlert', 'First and last name are required.');
       const res = await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify({ firstName, lastName, email, password }) });
       if (res.success) {
-        token = res.data.token; username = res.data.firstName + ' ' + res.data.lastName;
-        localStorage.setItem('bs_token', token); localStorage.setItem('bs_user', username);
-        applyAuthState();
+        showAlert('authAlert', '✅ Registration successful! Please log in with your credentials.', 'success');
+        document.getElementById('authEmail').value = '';
+        document.getElementById('authPassword').value = '';
+        setTimeout(() => setAuthMode(false), 2000);
       } else showAlert('authAlert', res.message || 'Registration failed.');
     } else {
       const res = await apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
